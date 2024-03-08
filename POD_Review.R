@@ -1,4 +1,59 @@
-## fehlende p-Werte Geschlecht Male
+install.packages("metafor")
+install.packages("meta")
+install.packages("RVAideMemoire")
+library(metafor)
+library(meta)
+library(RVAideMemoire)
+library(readxl)
+
+## Tabellen importieren
+POD_Hospital_sex_male <- read_excel("Dateipfad", 
+                                       sheet = "tables factors PoD hospital", 
+                                       range = "A28:L34", 
+                                       col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_ethnicity_black <- read_excel("Dateipfad", 
+                                           sheet = "tables factors PoD hospital", 
+                                           range = "O2:Z4",
+                                           col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_ethnicity_hispanic <- read_excel("Dateipfad", 
+                                           sheet = "tables factors PoD hospital", 
+                                           range = "O8:Z10",
+                                           col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_ethnicity_asian <- read_excel("Dateipfad", 
+                                           sheet = "tables factors PoD hospital", 
+                                           range = "O14:Z16",
+                                           col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_ethnicity_native <- read_excel("Dateipfad", 
+                                           sheet = "tables factors PoD hospital", 
+                                           range = "O20:Z22",
+                                           col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_residency_urban <- read_excel("Dateipfad", 
+                                            sheet = "tables factors PoD hospital", 
+                                            range = "AC28:AN34",
+                                            col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_family_married <- read_excel("Dateipfad", 
+                                           sheet = "tables factors PoD hospital", 
+                                           range = "AQ28:BB30",
+                                           col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_education_college <- read_excel("Dateipfad", 
+                                          sheet = "tables factors PoD hospital", 
+                                          range = "BS28:CD30",
+                                          col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+POD_Hospital_palliative_homecare <- read_excel("Dateipfad", 
+                                             sheet = "tables factors PoD hospital", 
+                                             range = "CG2:CR4",
+                                             col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+
+  ## fehlende p-Werte Geschlecht Male
 POD_Hospital_sex_male$se <- sqrt(1/POD_Hospital_sex_male$tpos + 1/POD_Hospital_sex_male$tneg + 1/POD_Hospital_sex_male$cpos + 1/POD_Hospital_sex_male$cneg)
 
 z_sex_kumar <- as.numeric(log(POD_Hospital_sex_male[4,9]) / POD_Hospital_sex_male$se[4])
