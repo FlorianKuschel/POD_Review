@@ -1,0 +1,65 @@
+## Tabelle laden
+POD_Hospital_sex_male <- read_excel("~/Library/CloudStorage/OneDrive-Persönlich/Documents/HiWi-Arbeit/POD_Auswertung.xlsx", 
+                                    sheet = "tables factors PoD hospital", 
+                                    range = "A2:L18", 
+                                    col_types = c("numeric", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+POD_Hospital_sex_male[, 3:12] <- round(POD_Hospital_sex_male[, 3:12])
+
+
+# Sanity check for the p-values: new values estimated via Fisher's exact test
+POD_Hospital_sex_male_complete_cases <- POD_Hospital_sex_male %>%
+  filter(complete.cases(tpos, tneg, cpos, cneg)) %>%
+  rowwise() %>%
+  mutate(fisher_result = list(fisher.test(matrix(c(tpos, tneg, cpos, cneg), nrow = 2)))) %>%
+  mutate(p_values_fisher = broom::tidy(fisher_result)$p.value) %>%
+  select(-fisher_result)
+
+# pval
+POD_Hospital_sex_male$se <- sqrt(1/POD_Hospital_sex_male$tpos + 1/POD_Hospital_sex_male$tneg + 1/POD_Hospital_sex_male$cpos + 1/POD_Hospital_sex_male$cneg)
+POD_Hospital_sex_male_complete_cases$se <- sqrt(1/POD_Hospital_sex_male_complete_cases$tpos + 1/POD_Hospital_sex_male_complete_cases$tneg + 1/POD_Hospital_sex_male_complete_cases$cpos + 1/POD_Hospital_sex_male_complete_cases$cneg)
+
+z_sex_kumar <- as.numeric(log(POD_Hospital_sex_male[4,9]) / POD_Hospital_sex_male$se[4])
+p_sex_kumar <- 2 * (1 - pnorm(abs(z_sex_kumar)))
+POD_Hospital_sex_male_complete_cases[4,12] <- p_sex_kumar
+POD_Hospital_sex_male[4,12] <- p_sex_kumar
+
+z_sex_moensb <- as.numeric(log(POD_Hospital_sex_male_complete_cases[5,9]) / POD_Hospital_sex_male_complete_cases$se[5])
+p_sex_moensb <- 2 * (1 - pnorm(abs(z_sex_moensb)))
+POD_Hospital_sex_male_complete_cases[5,12] <- p_sex_moensb
+POD_Hospital_sex_male[5,12] <- p_sex_moensb
+
+z_sex_moensf <- as.numeric(log(POD_Hospital_sex_male_complete_cases[6,9]) / POD_Hospital_sex_male_complete_cases$se[6])
+p_sex_moensf <- 2 * (1 - pnorm(abs(z_sex_moensf)))
+POD_Hospital_sex_male_complete_cases[6,12] <- p_sex_moensf
+POD_Hospital_sex_male[6,12] <- p_sex_moensf
+
+z_sex_moensi <- as.numeric(log(POD_Hospital_sex_male_complete_cases[7,9]) / POD_Hospital_sex_male_complete_cases$se[7])
+p_sex_moensi <- 2 * (1 - pnorm(abs(z_sex_moensi)))
+POD_Hospital_sex_male_complete_cases[7,12] <- p_sex_moensi
+POD_Hospital_sex_male[7,12] <- p_sex_moensi
+
+z_sex_moensc <- as.numeric(log(POD_Hospital_sex_male_complete_cases[8,9]) / POD_Hospital_sex_male_complete_cases$se[8])
+p_sex_moensc <- 2 * (1 - pnorm(abs(z_sex_moensc)))
+POD_Hospital_sex_male_complete_cases[8,12] <- p_sex_moensc
+POD_Hospital_sex_male[8,12] <- p_sex_moensc
+
+z_sex_moensu <- as.numeric(log(POD_Hospital_sex_male_complete_cases[15,9]) / POD_Hospital_sex_male_complete_cases$se[15])
+p_sex_moensu <- 2 * (1 - pnorm(abs(z_sex_moensu)))
+POD_Hospital_sex_male_complete_cases[15,12] <- p_sex_moensu
+POD_Hospital_sex_male[15,12] <- p_sex_moensu
+
+z_sex_zwicker <- as.numeric(log(POD_Hospital_sex_male[16, 9]) / ((log(POD_Hospital_sex_male[16, 11]) - log(POD_Hospital_sex_male[16, 10])) / (2 * 1.96)))
+p_sex_zwicker <- exp(-0.717 * z_sex_zwicker - 0.416 * z_sex_zwicker^2)
+POD_Hospital_sex_male[16,12] <- p_sex_zwicker
+
+## analyse
+POD_Hospital_sex_male$vi <- conv.wald(out = OR, ci.lb = ci.lb, ci.ub = ci.ub, pval = pval, n = n_ges, data = POD_Hospital_sex_male, transf = log)$vi ## Berechnung der Varianz der Effektgröße einer Studie
+POD_Hospital_sex_male$yi <- conv.wald(out = OR, ci.lb = ci.lb, ci.ub = ci.ub, pval = pval, n = n_ges, data = POD_Hospital_sex_male, transf = log)$yi ## Berechnung der Effektgröße einer Studie
+MA_POD_Hospital_sex_male <- rma(yi, vi, weights = 1/n_ges, data=POD_Hospital_sex_male)
+
+study_labels_sex <- paste(POD_Hospital_sex_male$Autor, POD_Hospital_sex_male$Jahr, sep = " - ")
+forest(MA_POD_Hospital_sex_male, slab = study_labels_sex, xlab = "Studie", mlab = "Effektgröße", cex=0.8, main = "Metaanalyse Geschlecht")
+
+predict(MA_POD_Hospital_sex_male, transf=exp, digits=2) ##Ausgabe der OR und CI
+
+funnel(MA_POD_Hospital_sex_male)
