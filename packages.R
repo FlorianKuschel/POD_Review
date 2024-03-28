@@ -1,4 +1,4 @@
-packages = c("metafor", "meta", "RVAideMemoire", "tidyverse", "readxl", "dplyr", "broom")
+packages = c("metafor", "tidyverse", "readxl", "dplyr", "broom")
 
 ## Now load or install & load all iff necessary
 package.check <- lapply(
