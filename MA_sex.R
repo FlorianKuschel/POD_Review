@@ -34,8 +34,11 @@ POD_Hospital_sex_male_complete_cases <- POD_Hospital_sex_male %>%
 POD_Hospital_sex_male <- conv.wald(out=OR, ci.lb=ci.lb, ci.ub=ci.ub, pval=pval, n=n_ges, data=POD_Hospital_sex_male, transf=log)
 MA_POD_Hospital_sex_male <- rma(yi, vi, weights = 1/n_ges, data=POD_Hospital_sex_male)
 
-study_labels_sex <- paste(POD_Hospital_sex_male$Autor, POD_Hospital_sex_male$Jahr, sep = " - ")
-forest <- forest(MA_POD_Hospital_sex_male, slab = study_labels_sex, xlab = "Studie", mlab = "Effektgröße", cex=0.8, main = "Metaanalyse Geschlecht")
+forest <- forest(MA_POD_Hospital_sex_male, #transf=exp, 
+                 slab = NA , xlab = "log (OR)", mlab = mlabfun("RE Model for All Studies", MA_POD_Hospital_sex_male), ilab = cbind(POD_Hospital_sex_male$Autor, POD_Hospital_sex_male$Jahr, POD_Hospital_sex_male$n_ges),
+                 xlim=c(-10,7), alim=c(-4,4), ylim=c(-5,20), ilab.xpos=c(-6,-5,-3.5), ilab.pos=c(2), at = c(-4, -3, -2, -1, 0, 1, 2, 3, 4),
+                 cex=0.8, main = "Metaanalyse Geschlecht", header = "Author, Year, n"
+)
 
 predict <- predict(MA_POD_Hospital_sex_male, transf=exp, digits=3) ##Ausgabe der OR und CI
 
